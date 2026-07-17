@@ -26,8 +26,9 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for the full design and rationale.
 
 ## Status
 
-Phase 0 (scaffold + CI) — backend skeleton with health probes, migrations, and CI.
-Later phases add ingestion, retrieval, the agent loop, tracing, and evaluation.
+- **Phase 0** — scaffold + CI: backend skeleton, health probes, migrations, CI. ✅
+- **Phase 1** — ingestion pipeline (parse → chunk → embed → store) + Documents UI. ✅
+- Next: hybrid retrieval + cited chat, the agent loop with approval gates, tracing, evaluation.
 
 ---
 
@@ -71,6 +72,33 @@ ruff format --check .
 pytest -q
 ```
 
+> **No API key needed for local dev.** With `GEMINI_API_KEY` unset, ingestion uses an
+> offline hashing embedder (deterministic, lexically meaningful) so the whole pipeline
+> works locally and in CI. Set `GEMINI_API_KEY` to switch to real Gemini embeddings.
+
+---
+
+## Local development (frontend)
+
+Prerequisites: **Node.js 20+**. Backend should be running first (above).
+
+```bash
+cd frontend
+npm install
+cp .env.local.example .env.local     # point NEXT_PUBLIC_API_BASE_URL at the backend
+npm run dev                          # http://localhost:3000
+```
+
+The Documents page (`/documents`) lets you upload files and watch ingestion status
+update live. The API client in `lib/api/schema.ts` is generated from the backend's
+OpenAPI schema — regenerate after backend contract changes:
+
+```bash
+npm run gen:api    # requires the backend running on the URL in package.json
+```
+
+Checks (what CI runs): `npm run typecheck` and `npm run build`.
+
 ---
 
 ## Secrets — how this maps to real practice
@@ -99,14 +127,18 @@ store in the cloud — never in git.**
 ├── ARCHITECTURE.md          # full design + rationale
 ├── docker-compose.yml       # local Postgres + pgvector
 ├── render.yaml              # backend infra-as-code (Render blueprint)
-├── .github/workflows/       # CI (lint + tests) and keepalive cron
-└── backend/
-    ├── app/
-    │   ├── main.py          # FastAPI app factory
-    │   ├── config.py        # env-driven settings
-    │   ├── db.py            # async engine + session
-    │   ├── api/health.py    # /healthz + /readyz
-    │   └── models/          # SQLAlchemy models
-    ├── alembic/             # migrations
-    └── tests/
+├── .github/workflows/       # CI (backend + frontend) and keepalive cron
+├── backend/
+│   ├── app/
+│   │   ├── main.py          # FastAPI app factory
+│   │   ├── config.py        # env-driven settings
+│   │   ├── api/             # health, documents
+│   │   ├── core/ingestion/  # parsers, chunker, embedder, pipeline
+│   │   └── models/          # SQLAlchemy models
+│   ├── alembic/             # migrations
+│   └── tests/
+└── frontend/
+    ├── app/                 # Next.js App Router pages
+    ├── components/          # UI (app shell, dropzone, tables)
+    └── lib/api/             # typed client generated from OpenAPI
 ```
