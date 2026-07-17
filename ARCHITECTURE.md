@@ -1,4 +1,4 @@
-# AI Operations Copilot — Architecture
+# AI Operations — Architecture
 
 > **Status:** Proposal v0.1 (2026-07-17) — pending refinement before implementation.
 > **Domain slice:** Support-resolution copilot (swappable to procurement/HR — the platform is domain-agnostic; only the seed data, tools, and prompts change).
@@ -92,7 +92,7 @@ This is the single most consequential decision, so it gets its own section.
 ## 5. Repository layout (monorepo)
 
 ```
-ai-operations-copilot/
+ai-operations/
 ├── frontend/                     # Next.js 15, TypeScript
 │   ├── app/(dashboard)/
 │   │   ├── documents/            # upload + ingestion status
