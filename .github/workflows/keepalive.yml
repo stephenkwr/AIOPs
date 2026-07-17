@@ -1,0 +1,24 @@
+name: Keepalive
+
+# Supabase free projects pause after ~7 days of inactivity, and Render free
+# services spin down when idle. This cron hits the backend readiness probe
+# (which runs a DB query), keeping both awake. Runs every 3 days.
+#
+# Setup: add a repo secret BACKEND_READY_URL = https://<your-backend>/readyz
+on:
+  schedule:
+    - cron: "0 6 */3 * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping readiness probe
+        run: |
+          URL="${{ secrets.BACKEND_READY_URL }}"
+          if [ -z "$URL" ]; then
+            echo "BACKEND_READY_URL not set yet — skipping."
+            exit 0
+          fi
+          curl -fsS "$URL" && echo " — OK"

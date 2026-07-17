@@ -1,0 +1,11 @@
+# Normalize line endings to LF in the repo (checked out as-is on Windows too).
+# Keeps CI shell scripts and YAML consistent across contributors.
+* text=auto eol=lf
+
+# Binary types Git should never touch.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.pdf binary
+*.ico binary

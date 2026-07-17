@@ -1,0 +1,30 @@
+# Render Blueprint (infra-as-code) for the backend web service.
+# Free plan spins down after ~15 min idle; the health check keeps the platform happy.
+# Migrations run at container start so the DB schema is always current on deploy.
+services:
+  - type: web
+    name: copilot-backend
+    runtime: python
+    plan: free
+    rootDir: backend
+    buildCommand: "pip install -e ."
+    startCommand: "bash -c 'alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT'"
+    healthCheckPath: /healthz
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: PYTHON_VERSION
+        value: "3.12"
+      # Set these in the Render dashboard (sync:false = not stored in this file).
+      - key: DATABASE_URL          # Supabase transaction pooler (port 6543)
+        sync: false
+      - key: DATABASE_URL_DIRECT   # Supabase direct connection (port 5432), for migrations
+        sync: false
+      - key: CORS_ORIGINS          # e.g. https://your-app.vercel.app
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
