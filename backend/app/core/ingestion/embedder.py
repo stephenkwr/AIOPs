@@ -35,6 +35,8 @@ class Embedder(Protocol):
 
     async def embed(self, texts: list[str]) -> list[list[float]]: ...
 
+    async def embed_query(self, text: str) -> list[float]: ...
+
 
 class HashingEmbedder:
     """Signed feature hashing → unit vectors. Deterministic, offline."""
@@ -44,6 +46,9 @@ class HashingEmbedder:
 
     async def embed(self, texts: list[str]) -> list[list[float]]:
         return [self._embed_one(t) for t in texts]
+
+    async def embed_query(self, text: str) -> list[float]:
+        return self._embed_one(text)
 
     def _embed_one(self, text: str) -> list[float]:
         vec = [0.0] * self.dim
@@ -68,11 +73,17 @@ class GeminiEmbedder:
     async def embed(self, texts: list[str]) -> list[list[float]]:
         out: list[list[float]] = []
         for start in range(0, len(texts), _GEMINI_BATCH):
-            out.extend(await self._embed_batch(texts[start : start + _GEMINI_BATCH]))
+            out.extend(
+                await self._embed_batch(texts[start : start + _GEMINI_BATCH], "RETRIEVAL_DOCUMENT")
+            )
         return out
 
+    async def embed_query(self, text: str) -> list[float]:
+        # Queries use a different task type than documents for asymmetric retrieval.
+        return (await self._embed_batch([text], "RETRIEVAL_QUERY"))[0]
+
     @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, max=10))
-    async def _embed_batch(self, batch: list[str]) -> list[list[float]]:
+    async def _embed_batch(self, batch: list[str], task_type: str) -> list[list[float]]:
         from google.genai import types
 
         resp = await asyncio.to_thread(
@@ -81,7 +92,7 @@ class GeminiEmbedder:
             contents=batch,
             config=types.EmbedContentConfig(
                 output_dimensionality=self.dim,
-                task_type="RETRIEVAL_DOCUMENT",
+                task_type=task_type,
             ),
         )
         # Truncated (<3072-dim) embeddings aren't returned normalized — do it here.

@@ -3,8 +3,18 @@ import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy import text
 
+from app.config import settings
 from app.db import engine
 from app.main import app
+
+
+@pytest.fixture(scope="session", autouse=True)
+def _hermetic_providers() -> None:
+    """Force offline providers so tests never call Gemini/Groq, even when the
+    developer's .env has real keys. Real providers are covered by a separate
+    live smoke check, not the unit suite."""
+    settings.embed_provider = "fake"
+    settings.llm_provider = "fake"
 
 
 @pytest_asyncio.fixture

@@ -22,6 +22,8 @@ dependencies = [
   "pypdf>=5.0",
   "selectolax>=0.3.21",
   "google-genai>=1.0",
+  "groq>=0.13",
+  "anthropic>=0.40",
 ]
 
 [project.optional-dependencies]

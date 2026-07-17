@@ -33,10 +33,22 @@ class Settings(BaseSettings):
     anthropic_api_key: str | None = None
 
     # Model selection.
-    agent_model: str = "gemini-2.5-flash"
+    # gemini-flash-latest is an alias Google keeps pointed at the current flash
+    # model — avoids "model no longer available" 404s as versions retire.
+    agent_model: str = "gemini-flash-latest"
+    groq_model: str = "llama-3.3-70b-versatile"
+    anthropic_model: str = "claude-opus-4-8"
     judge_model: str = "llama-3.3-70b-versatile"
     embed_model: str = "gemini-embedding-001"
     embed_dim: int = 768
+
+    # LLM provider: auto = Gemini if a key is set, else Groq, else the offline fake.
+    llm_provider: str = "auto"  # auto | gemini | groq | anthropic | fake
+
+    # Retrieval.
+    retrieval_mode: str = "hybrid"  # hybrid | vector
+    retrieval_k: int = 8  # chunks passed to the LLM as context
+    retrieval_candidates: int = 20  # per-list depth before fusion
 
     # Ingestion.
     storage_dir: str = "./_storage"  # local file storage root (dev); Supabase Storage in prod
