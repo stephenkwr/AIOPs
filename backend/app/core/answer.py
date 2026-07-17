@@ -73,3 +73,22 @@ def compute_confidence(retrieved: list[RetrievedChunk], answer: str) -> tuple[fl
         "self_score": None,  # deferred: would require a second LLM call
     }
     return confidence, parts
+
+
+def compute_agent_confidence(citations: list[dict], answer: str) -> tuple[float, dict]:
+    """Confidence for an agent answer.
+
+    The agent gets sources from the kb_search tool (dicts, not scored chunks), so
+    this uses grounding (did it retrieve anything) + citation coverage.
+    """
+    grounded = 1.0 if citations else 0.0
+    sentences = [s for s in re.split(r"(?<=[.!?])\s+", answer.strip()) if s]
+    cited = sum(1 for s in sentences if re.search(r"\[\d+\]", s))
+    coverage = cited / len(sentences) if sentences else 0.0
+    confidence = round(0.5 * grounded + 0.5 * coverage, 3)
+    parts = {
+        "grounded": grounded,
+        "citation_coverage": round(coverage, 3),
+        "self_score": None,
+    }
+    return confidence, parts

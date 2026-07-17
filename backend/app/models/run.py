@@ -23,13 +23,16 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import Base
 
-RUN_STATUSES = ("running", "completed", "failed")
+RUN_STATUSES = ("running", "awaiting_approval", "completed", "failed", "cancelled")
 
 
 class Run(Base):
     __tablename__ = "runs"
     __table_args__ = (
-        CheckConstraint("status IN ('running','completed','failed')", name="ck_runs_status"),
+        CheckConstraint(
+            "status IN ('running','awaiting_approval','completed','failed','cancelled')",
+            name="ck_runs_status",
+        ),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(
@@ -40,7 +43,7 @@ class Run(Base):
     )
     question: Mapped[str] = mapped_column(Text, nullable=False)
     mode: Mapped[str] = mapped_column(String(16), nullable=False, server_default="ask")
-    status: Mapped[str] = mapped_column(String(16), nullable=False, server_default="running")
+    status: Mapped[str] = mapped_column(String(32), nullable=False, server_default="running")
 
     answer: Mapped[str | None] = mapped_column(Text, nullable=True)
     citations: Mapped[list | None] = mapped_column(JSONB, nullable=True)
@@ -54,6 +57,12 @@ class Run(Base):
     latency_ms: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
     failure_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    # Durable agent state: the serialized LLM message history. The run resumes
+    # from this after an approval pause, so no agent state lives in memory.
+    agent_state: Mapped[list | None] = mapped_column(JSONB, nullable=True)
+    step_count: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
+
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )

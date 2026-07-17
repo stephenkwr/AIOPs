@@ -6,7 +6,7 @@ swap-in. Uses the official SDK's streaming helper (never an OpenAI-compat shim).
 
 from collections.abc import AsyncIterator
 
-from app.core.llm.base import LLMMessage, LLMUsage, StreamEvent
+from app.core.llm.base import AssistantTurn, LLMMessage, LLMUsage, StreamEvent, ToolSpec
 
 
 class AnthropicClient:
@@ -37,3 +37,11 @@ class AnthropicClient:
                 output_tokens=final.usage.output_tokens,
             )
         yield StreamEvent(type="done", usage=usage)
+
+    async def complete_with_tools(
+        self, messages: list[LLMMessage], tools: list[ToolSpec], *, max_tokens: int
+    ) -> AssistantTurn:
+        # Deferred: the streaming Q&A path works, but tool-calling isn't wired for
+        # Claude yet (no key available to verify against). The agent loop runs on
+        # Gemini/Groq. Implement with the SDK's tool_use blocks when adding Claude.
+        raise NotImplementedError("Anthropic tool-calling is not yet implemented")

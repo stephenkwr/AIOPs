@@ -50,6 +50,13 @@ class Settings(BaseSettings):
     retrieval_k: int = 8  # chunks passed to the LLM as context
     retrieval_candidates: int = 20  # per-list depth before fusion
 
+    # Agent guardrails (hard budgets enforced in the loop).
+    agent_max_steps: int = 8  # max LLM turns per run
+    agent_token_budget: int = 60000  # total tokens per run
+    tool_timeout_seconds: float = 10.0
+    tool_max_retries: int = 2
+    approval_expiry_hours: int = 24
+
     # Ingestion.
     storage_dir: str = "./_storage"  # local file storage root (dev); Supabase Storage in prod
     max_upload_mb: int = 10

@@ -8,7 +8,7 @@ the response, so the run trace shows the truth.
 
 from collections.abc import AsyncIterator
 
-from app.core.llm.base import LLMClient, StreamEvent
+from app.core.llm.base import AssistantTurn, LLMClient, LLMMessage, StreamEvent, ToolSpec
 
 
 class FallbackLLMClient:
@@ -36,3 +36,17 @@ class FallbackLLMClient:
                 continue
         if last_exc is not None:
             raise last_exc
+
+    async def complete_with_tools(
+        self, messages: list[LLMMessage], tools: list[ToolSpec], *, max_tokens: int
+    ) -> AssistantTurn:
+        last_exc: Exception | None = None
+        for client in self._clients:
+            self.last_model = client.model
+            try:
+                return await client.complete_with_tools(messages, tools, max_tokens=max_tokens)
+            except Exception as exc:  # noqa: BLE001 — try the next provider
+                last_exc = exc
+                continue
+        assert last_exc is not None
+        raise last_exc
