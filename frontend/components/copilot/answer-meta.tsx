@@ -25,7 +25,10 @@ export function AnswerMetaRow({ meta }: { meta: AnswerMeta }) {
   const c = confidenceLabel(conf);
   const parts = meta.confidence_parts;
   const confTooltip = parts
-    ? `retrieval ${parts.retrieval ?? 0} · citation coverage ${parts.citation_coverage ?? 0}`
+    ? Object.entries(parts)
+        .filter(([, v]) => v !== null && v !== undefined)
+        .map(([k, v]) => `${k.replace(/_/g, " ")} ${v}`)
+        .join(" · ")
     : undefined;
 
   return (

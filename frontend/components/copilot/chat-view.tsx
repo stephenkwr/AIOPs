@@ -3,27 +3,39 @@
 import { Loader2, SendHorizonal } from "lucide-react";
 import { useRef, useState } from "react";
 
-import { type AnswerMeta, type Citation, createConversation, streamAsk } from "@/lib/api/chat";
+import {
+  type AgentEvent,
+  type AgentStep,
+  decideApproval,
+  streamAgent,
+  streamResume,
+} from "@/lib/api/agent";
+import { type AnswerMeta, type Citation, createConversation } from "@/lib/api/chat";
 import { cn } from "@/lib/utils";
 
 import { AnswerMetaRow } from "./answer-meta";
+import { ApprovalCard, type ApprovalState } from "./approval-card";
 import { MessageContent } from "./message-content";
 import { SourcesPanel } from "./sources-panel";
+import { StepTrail } from "./step-trail";
 
 type ChatMessage = {
   id: string;
   role: "user" | "assistant";
   content: string;
+  steps: AgentStep[];
   citations?: Citation[];
+  approval?: ApprovalState;
   meta?: AnswerMeta;
+  runId?: string;
   streaming?: boolean;
   error?: string;
 };
 
 const EXAMPLES = [
   "How do I reset my password?",
-  "How long do refunds take?",
-  "Who handles escalations?",
+  "What's the status of order 1042?",
+  "Please escalate a billing dispute for order 1043 to a human.",
 ];
 
 function patch(messages: ChatMessage[], id: string, fn: (m: ChatMessage) => ChatMessage) {
@@ -34,9 +46,40 @@ export function ChatView() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
-  const [activeMessageId, setActiveMessageId] = useState<string | null>(null);
+  const [activeId, setActiveId] = useState<string | null>(null);
   const [highlighted, setHighlighted] = useState<number | null>(null);
   const conversationId = useRef<string | null>(null);
+
+  function applyEvent(id: string, ev: AgentEvent) {
+    setMessages((m) =>
+      patch(m, id, (x) => {
+        switch (ev.type) {
+          case "run":
+            return { ...x, runId: ev.run_id };
+          case "step":
+            return x; // llm_call steps are internal; tool activity comes via tool_result
+          case "tool_result":
+            return { ...x, steps: [...x.steps, { type: "tool", name: ev.name, status: ev.status }] };
+          case "sources":
+            return { ...x, citations: ev.citations };
+          case "approval_required":
+            return { ...x, approval: ev.approval, streaming: false };
+          case "token":
+            return { ...x, content: x.content + ev.text };
+          case "done":
+            return { ...x, meta: ev.meta, streaming: false };
+          case "error":
+            return { ...x, error: ev.message, streaming: false };
+          default:
+            return x;
+        }
+      }),
+    );
+  }
+
+  async function runStream(id: string, gen: AsyncGenerator<AgentEvent>) {
+    for await (const ev of gen) applyEvent(id, ev);
+  }
 
   async function send(question: string) {
     const q = question.trim();
@@ -48,29 +91,17 @@ export function ChatView() {
     const assistantId = crypto.randomUUID();
     setMessages((m) => [
       ...m,
-      { id: userId, role: "user", content: q },
-      { id: assistantId, role: "assistant", content: "", streaming: true },
+      { id: userId, role: "user", content: q, steps: [] },
+      { id: assistantId, role: "assistant", content: "", steps: [], streaming: true },
     ]);
-    setActiveMessageId(assistantId);
+    setActiveId(assistantId);
     setHighlighted(null);
 
     try {
       if (!conversationId.current) {
         conversationId.current = (await createConversation()).id;
       }
-      for await (const ev of streamAsk(conversationId.current, q)) {
-        if (ev.type === "sources") {
-          setMessages((m) => patch(m, assistantId, (x) => ({ ...x, citations: ev.citations })));
-        } else if (ev.type === "token") {
-          setMessages((m) => patch(m, assistantId, (x) => ({ ...x, content: x.content + ev.text })));
-        } else if (ev.type === "done") {
-          setMessages((m) => patch(m, assistantId, (x) => ({ ...x, meta: ev.meta, streaming: false })));
-        } else if (ev.type === "error") {
-          setMessages((m) =>
-            patch(m, assistantId, (x) => ({ ...x, error: ev.message, streaming: false })),
-          );
-        }
-      }
+      await runStream(assistantId, streamAgent(conversationId.current, q));
     } catch (err) {
       const message = err instanceof Error ? err.message : "Streaming failed";
       setMessages((m) => patch(m, assistantId, (x) => ({ ...x, error: message, streaming: false })));
@@ -79,7 +110,30 @@ export function ChatView() {
     }
   }
 
-  const activeCitations = messages.find((m) => m.id === activeMessageId)?.citations;
+  async function decide(id: string, approval: ApprovalState, decision: "approve" | "reject", note?: string) {
+    setBusy(true);
+    setMessages((m) =>
+      patch(m, id, (x) => ({ ...x, approval: { ...approval, deciding: true } })),
+    );
+    try {
+      await decideApproval(approval.approval_id, decision, note);
+      setMessages((m) =>
+        patch(m, id, (x) => ({
+          ...x,
+          approval: { ...approval, deciding: false, decision: decision === "approve" ? "approved" : "rejected" },
+          streaming: true,
+        })),
+      );
+      await runStream(id, streamResume(approval.run_id));
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Resume failed";
+      setMessages((m) => patch(m, id, (x) => ({ ...x, error: message, streaming: false })));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const activeCitations = messages.find((m) => m.id === activeId)?.citations;
 
   return (
     <div className="flex flex-col gap-8 lg:flex-row">
@@ -87,7 +141,8 @@ export function ChatView() {
         <header className="mb-4">
           <h1 className="text-2xl font-semibold tracking-tight">Copilot</h1>
           <p className="mt-1 text-sm text-slate-500">
-            Ask a question. Answers are grounded in your knowledge base with inline citations.
+            The copilot searches the knowledge base, looks up orders, and can escalate to a human —
+            with your approval before any action.
           </p>
         </header>
 
@@ -110,37 +165,39 @@ export function ChatView() {
             </div>
           ) : (
             messages.map((m) => (
-              <div
-                key={m.id}
-                className={cn("flex", m.role === "user" ? "justify-end" : "justify-start")}
-              >
+              <div key={m.id} className={cn("flex", m.role === "user" ? "justify-end" : "justify-start")}>
                 <div
                   className={cn(
                     "max-w-[85%] rounded-2xl px-4 py-3",
-                    m.role === "user"
-                      ? "bg-slate-900 text-sm text-white"
-                      : "border border-slate-200 bg-white",
+                    m.role === "user" ? "bg-slate-900 text-sm text-white" : "border border-slate-200 bg-white",
                   )}
                 >
                   {m.role === "user" ? (
                     <p className="whitespace-pre-wrap text-sm leading-relaxed">{m.content}</p>
                   ) : (
                     <>
+                      <StepTrail steps={m.steps} />
                       {m.content && (
                         <MessageContent
                           content={m.content}
                           onCite={(n) => {
-                            setActiveMessageId(m.id);
+                            setActiveId(m.id);
                             setHighlighted(n);
                           }}
                         />
                       )}
-                      {m.streaming && !m.content && (
+                      {m.streaming && !m.content && !m.approval && (
                         <div className="flex items-center gap-2 text-sm text-slate-400">
-                          <Loader2 className="h-4 w-4 animate-spin" /> Retrieving and thinking…
+                          <Loader2 className="h-4 w-4 animate-spin" /> Working…
                         </div>
                       )}
-                      {m.error && <p className="text-sm text-red-600">⚠ {m.error}</p>}
+                      {m.approval && (
+                        <ApprovalCard
+                          approval={m.approval}
+                          onDecide={(decision, note) => decide(m.id, m.approval!, decision, note)}
+                        />
+                      )}
+                      {m.error && <p className="mt-2 text-sm text-red-600">⚠ {m.error}</p>}
                       {m.meta && <AnswerMetaRow meta={m.meta} />}
                     </>
                   )}

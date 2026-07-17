@@ -16,6 +16,7 @@ export type Citation = {
 
 export type ConfidenceParts = {
   retrieval?: number;
+  grounded?: number;
   citation_coverage?: number;
   self_score?: number | null;
 };
