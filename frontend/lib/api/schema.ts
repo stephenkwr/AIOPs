@@ -108,6 +108,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/runs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Runs
+         * @description Every run in the workspace — chat and agent — newest first, for the Traces list.
+         */
+        get: operations["list_runs_api_v1_runs_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/runs/{run_id}": {
         parameters: {
             query?: never;
@@ -117,6 +137,26 @@ export interface paths {
         };
         /** Get Run */
         get: operations["get_run_api_v1_runs__run_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/runs/{run_id}/trace": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Run Trace
+         * @description Full run detail plus its ordered steps — the trace waterfall reads this.
+         */
+        get: operations["get_run_trace_api_v1_runs__run_id__trace_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -529,6 +569,141 @@ export interface components {
             /** Finished At */
             finished_at: string | null;
         };
+        /** RunStepOut */
+        RunStepOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Ord */
+            ord: number;
+            /** Type */
+            type: string;
+            /** Name */
+            name: string;
+            /** Input */
+            input: {
+                [key: string]: unknown;
+            } | null;
+            /** Output */
+            output: {
+                [key: string]: unknown;
+            } | null;
+            /** Status */
+            status: string;
+            /** Latency Ms */
+            latency_ms: number | null;
+            /** Tokens In */
+            tokens_in: number;
+            /** Tokens Out */
+            tokens_out: number;
+            /** Cost Usd */
+            cost_usd: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+        };
+        /**
+         * RunSummary
+         * @description Lean row for the Traces list — no answer/citations payload.
+         */
+        RunSummary: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Conversation Id
+             * Format: uuid
+             */
+            conversation_id: string;
+            /** Question */
+            question: string;
+            /** Mode */
+            mode: string;
+            /** Status */
+            status: string;
+            /** Model */
+            model: string | null;
+            /** Tokens In */
+            tokens_in: number;
+            /** Tokens Out */
+            tokens_out: number;
+            /** Cost Usd */
+            cost_usd: number;
+            /** Latency Ms */
+            latency_ms: number | null;
+            /** Confidence */
+            confidence: number | null;
+            /** Step Count */
+            step_count: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Finished At */
+            finished_at: string | null;
+        };
+        /**
+         * RunTrace
+         * @description Full run detail plus its ordered step-by-step trace.
+         */
+        RunTrace: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Conversation Id
+             * Format: uuid
+             */
+            conversation_id: string;
+            /** Question */
+            question: string;
+            /** Mode */
+            mode: string;
+            /** Status */
+            status: string;
+            /** Answer */
+            answer: string | null;
+            /** Citations */
+            citations: {
+                [key: string]: unknown;
+            }[] | null;
+            /** Confidence */
+            confidence: number | null;
+            /** Confidence Parts */
+            confidence_parts: {
+                [key: string]: unknown;
+            } | null;
+            /** Model */
+            model: string | null;
+            /** Tokens In */
+            tokens_in: number;
+            /** Tokens Out */
+            tokens_out: number;
+            /** Cost Usd */
+            cost_usd: number;
+            /** Latency Ms */
+            latency_ms: number | null;
+            /** Failure Reason */
+            failure_reason: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Finished At */
+            finished_at: string | null;
+            /** Steps */
+            steps: components["schemas"]["RunStepOut"][];
+        };
         /** ValidationError */
         ValidationError: {
             /** Location */
@@ -770,6 +945,37 @@ export interface operations {
             };
         };
     };
+    list_runs_api_v1_runs_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunSummary"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     get_run_api_v1_runs__run_id__get: {
         parameters: {
             query?: never;
@@ -788,6 +994,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RunOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_run_trace_api_v1_runs__run_id__trace_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunTrace"];
                 };
             };
             /** @description Validation Error */

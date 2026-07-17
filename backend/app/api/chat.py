@@ -5,9 +5,9 @@ import time
 import uuid
 from collections.abc import AsyncIterator
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import StreamingResponse
-from sqlalchemy import func
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
@@ -18,13 +18,16 @@ from app.core.llm.pricing import estimate_cost
 from app.core.retrieval.retriever import retrieve
 from app.db import SessionLocal, get_session
 from app.deps import get_workspace_id
-from app.models import Conversation, Message, Run
+from app.models import Conversation, Message, Run, RunStep
 from app.schemas.chat import (
     AskRequest,
     ConversationCreate,
     ConversationDetail,
     ConversationOut,
     RunOut,
+    RunStepOut,
+    RunSummary,
+    RunTrace,
 )
 
 router = APIRouter(prefix="/api/v1", tags=["chat"])
@@ -62,6 +65,38 @@ async def get_conversation(
     return conv
 
 
+@router.get("/runs", response_model=list[RunSummary])
+async def list_runs(
+    limit: int = Query(default=50, ge=1, le=200),
+    session: AsyncSession = Depends(get_session),
+    workspace_id: uuid.UUID = Depends(get_workspace_id),
+) -> list[RunSummary]:
+    """Every run in the workspace — chat and agent — newest first, for the Traces list.
+
+    ``step_count`` here is the number of recorded trace steps (so it matches the
+    waterfall on the detail page), not the agent's internal LLM-turn budget counter.
+    """
+    recorded_steps = (
+        select(func.count(RunStep.id))
+        .where(RunStep.run_id == Run.id)
+        .correlate(Run)
+        .scalar_subquery()
+    )
+    result = await session.execute(
+        select(Run, recorded_steps.label("steps"))
+        .join(Conversation, Run.conversation_id == Conversation.id)
+        .where(Conversation.workspace_id == workspace_id)
+        .order_by(Run.created_at.desc())
+        .limit(limit)
+    )
+    summaries: list[RunSummary] = []
+    for run, steps in result.all():
+        summary = RunSummary.model_validate(run)
+        summary.step_count = steps
+        summaries.append(summary)
+    return summaries
+
+
 @router.get("/runs/{run_id}", response_model=RunOut)
 async def get_run(
     run_id: uuid.UUID,
@@ -75,6 +110,28 @@ async def get_run(
     if conv is None or conv.workspace_id != workspace_id:
         raise HTTPException(status_code=404, detail="Run not found")
     return run
+
+
+@router.get("/runs/{run_id}/trace", response_model=RunTrace)
+async def get_run_trace(
+    run_id: uuid.UUID,
+    session: AsyncSession = Depends(get_session),
+    workspace_id: uuid.UUID = Depends(get_workspace_id),
+) -> RunTrace:
+    """Full run detail plus its ordered steps — the trace waterfall reads this."""
+    run = await session.get(Run, run_id)
+    if run is None:
+        raise HTTPException(status_code=404, detail="Run not found")
+    conv = await session.get(Conversation, run.conversation_id)
+    if conv is None or conv.workspace_id != workspace_id:
+        raise HTTPException(status_code=404, detail="Run not found")
+    steps = await session.scalars(
+        select(RunStep).where(RunStep.run_id == run_id).order_by(RunStep.ord)
+    )
+    return RunTrace(
+        **RunOut.model_validate(run).model_dump(),
+        steps=[RunStepOut.model_validate(s) for s in steps],
+    )
 
 
 @router.post("/conversations/{conversation_id}/ask")
@@ -102,6 +159,7 @@ async def ask(
     run_id = run.id
 
     # Retrieve context now (uses the request session).
+    retr_start = time.monotonic()
     retrieved = await retrieve(
         session,
         workspace_id,
@@ -110,6 +168,7 @@ async def ask(
         k=settings.retrieval_k,
         candidates=settings.retrieval_candidates,
     )
+    retrieval_ms = int((time.monotonic() - retr_start) * 1000)
     citations = citations_payload(retrieved)
     messages = build_messages(body.question, retrieved)
     client = get_answer_client()
@@ -122,12 +181,14 @@ async def ask(
         answer_parts: list[str] = []
         usage = LLMUsage()
         try:
+            llm_start = time.monotonic()
             async for ev in client.stream(messages, max_tokens=ANSWER_MAX_TOKENS):
                 if ev.type == "delta":
                     answer_parts.append(ev.text)
                     yield _sse("token", {"text": ev.text})
                 elif ev.type == "done" and ev.usage is not None:
                     usage = ev.usage
+            llm_ms = int((time.monotonic() - llm_start) * 1000)
 
             answer = "".join(answer_parts).strip()
             # Which provider actually served (fallback chain may have switched).
@@ -149,7 +210,43 @@ async def ask(
                     r.cost_usd = cost
                     r.latency_ms = latency_ms
                     r.status = "completed"
+                    r.step_count = 2
                     r.finished_at = func.now()
+                    # Record the trace so a chat run is as inspectable as an agent run.
+                    write.add(
+                        RunStep(
+                            run_id=run_id,
+                            ord=0,
+                            type="retrieval",
+                            name=settings.retrieval_mode,
+                            input={
+                                "query": body.question,
+                                "mode": settings.retrieval_mode,
+                                "k": settings.retrieval_k,
+                            },
+                            output={
+                                "candidates": settings.retrieval_candidates,
+                                "returned": len(citations),
+                            },
+                            status="ok",
+                            latency_ms=retrieval_ms,
+                        )
+                    )
+                    write.add(
+                        RunStep(
+                            run_id=run_id,
+                            ord=1,
+                            type="llm_call",
+                            name=model_name,
+                            input={"prompt_messages": len(messages)},
+                            output={"answer_chars": len(answer)},
+                            status="ok",
+                            latency_ms=llm_ms,
+                            tokens_in=usage.input_tokens,
+                            tokens_out=usage.output_tokens,
+                            cost_usd=cost,
+                        )
+                    )
                     write.add(
                         Message(
                             conversation_id=conversation_id,

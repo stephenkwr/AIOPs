@@ -13,6 +13,17 @@ export function formatRelativeTime(iso: string): string {
   return `${Math.round(h / 24)}d ago`;
 }
 
+export function formatLatency(ms: number | null | undefined): string {
+  if (ms == null) return "—";
+  if (ms < 1000) return `${ms} ms`;
+  return `${(ms / 1000).toFixed(2)} s`;
+}
+
+export function formatCost(usd: number | null | undefined): string {
+  if (usd == null) return "—";
+  return `$${usd.toFixed(4)}`;
+}
+
 export function fileKindLabel(mime: string, filename: string): string {
   const ext = filename.includes(".") ? filename.split(".").pop()!.toLowerCase() : "";
   if (mime.includes("pdf") || ext === "pdf") return "PDF";

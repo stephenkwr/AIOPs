@@ -57,3 +57,47 @@ class RunOut(BaseModel):
     failure_reason: str | None
     created_at: datetime
     finished_at: datetime | None
+
+
+class RunSummary(BaseModel):
+    """Lean row for the Traces list — no answer/citations payload."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    conversation_id: uuid.UUID
+    question: str
+    mode: str
+    status: str
+    model: str | None
+    tokens_in: int
+    tokens_out: int
+    cost_usd: float
+    latency_ms: int | None
+    confidence: float | None
+    step_count: int
+    created_at: datetime
+    finished_at: datetime | None
+
+
+class RunStepOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    ord: int
+    type: str
+    name: str
+    input: dict | None
+    output: dict | None
+    status: str
+    latency_ms: int | None
+    tokens_in: int
+    tokens_out: int
+    cost_usd: float
+    created_at: datetime
+
+
+class RunTrace(RunOut):
+    """Full run detail plus its ordered step-by-step trace."""
+
+    steps: list[RunStepOut]
