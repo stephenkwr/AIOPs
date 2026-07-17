@@ -1,4 +1,4 @@
-# AI Operations Copilot
+# AI Operations
 
 A support-resolution copilot: ingest internal docs → answer with cited sources →
 route to tools (knowledge base, order lookup, escalation) → **require human approval
