@@ -38,6 +38,15 @@ class Settings(BaseSettings):
     embed_model: str = "gemini-embedding-001"
     embed_dim: int = 768
 
+    # Ingestion.
+    storage_dir: str = "./_storage"  # local file storage root (dev); Supabase Storage in prod
+    max_upload_mb: int = 10
+    # auto -> Gemini if a key is set, else the offline hashing embedder.
+    embed_provider: str = "auto"  # auto | gemini | fake
+    chunker: str = "structure"  # structure | naive (naive is the eval "before" baseline)
+    chunk_target_tokens: int = 800
+    chunk_overlap_ratio: float = 0.15
+
     @cached_property
     def cors_origins_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]

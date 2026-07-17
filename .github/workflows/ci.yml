@@ -3,7 +3,7 @@ name: CI
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [main, master]
 
 jobs:
   backend:
@@ -28,6 +28,8 @@ jobs:
     env:
       DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/copilot_test
       DATABASE_URL_DIRECT: postgresql+asyncpg://postgres:postgres@localhost:5432/copilot_test
+      # No LLM keys in CI — force the offline hashing embedder so tests are hermetic.
+      EMBED_PROVIDER: fake
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
