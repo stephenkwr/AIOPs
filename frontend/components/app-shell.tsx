@@ -15,7 +15,7 @@ type NavItem = {
 
 const NAV: NavItem[] = [
   { href: "/documents", label: "Documents", icon: FileText, enabled: true },
-  { href: "/copilot", label: "Copilot", icon: MessageSquare, enabled: false },
+  { href: "/copilot", label: "Copilot", icon: MessageSquare, enabled: true },
   { href: "/traces", label: "Traces", icon: Activity, enabled: false },
   { href: "/evals", label: "Evaluation", icon: FlaskConical, enabled: false },
   { href: "/escalations", label: "Escalations", icon: AlertTriangle, enabled: false },
