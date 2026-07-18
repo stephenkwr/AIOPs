@@ -4,7 +4,7 @@ import json
 import uuid
 from collections.abc import AsyncIterator
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import StreamingResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -12,6 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.agent.loop import resume_agent_run, start_agent_run
 from app.db import SessionLocal, get_session
 from app.deps import get_workspace_id
+from app.limits import ASK_LIMIT, RESUME_LIMIT, limiter
 from app.models import Conversation, Message, Run
 from app.schemas.agent import AgentAskRequest
 
@@ -46,7 +47,9 @@ async def _finalize_assistant_message(run_id: uuid.UUID) -> None:
 
 
 @router.post("/conversations/{conversation_id}/agent")
+@limiter.limit(ASK_LIMIT)
 async def agent_ask(
+    request: Request,
     conversation_id: uuid.UUID,
     body: AgentAskRequest,
     session: AsyncSession = Depends(get_session),
@@ -83,7 +86,9 @@ async def agent_ask(
 
 
 @router.post("/runs/{run_id}/resume")
+@limiter.limit(RESUME_LIMIT)
 async def resume_run(
+    request: Request,
     run_id: uuid.UUID,
     session: AsyncSession = Depends(get_session),
     workspace_id: uuid.UUID = Depends(get_workspace_id),

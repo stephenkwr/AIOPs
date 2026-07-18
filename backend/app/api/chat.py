@@ -5,7 +5,7 @@ import time
 import uuid
 from collections.abc import AsyncIterator
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import StreamingResponse
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -18,6 +18,7 @@ from app.core.llm.pricing import estimate_cost
 from app.core.retrieval.retriever import retrieve
 from app.db import SessionLocal, get_session
 from app.deps import get_workspace_id
+from app.limits import ASK_LIMIT, limiter
 from app.models import Conversation, Message, Run, RunStep
 from app.schemas.chat import (
     AskRequest,
@@ -135,7 +136,9 @@ async def get_run_trace(
 
 
 @router.post("/conversations/{conversation_id}/ask")
+@limiter.limit(ASK_LIMIT)
 async def ask(
+    request: Request,
     conversation_id: uuid.UUID,
     body: AskRequest,
     session: AsyncSession = Depends(get_session),

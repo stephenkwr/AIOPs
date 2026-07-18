@@ -3,7 +3,7 @@
 import hashlib
 import uuid
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, UploadFile
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, UploadFile
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -13,6 +13,7 @@ from app.core.ingestion.pipeline import process_document
 from app.core.storage import get_storage
 from app.db import get_session
 from app.deps import get_workspace_id
+from app.limits import UPLOAD_LIMIT, limiter
 from app.models import Document
 from app.schemas.document import DocumentOut
 
@@ -20,7 +21,9 @@ router = APIRouter(prefix="/api/v1/documents", tags=["documents"])
 
 
 @router.post("", response_model=DocumentOut, status_code=201)
+@limiter.limit(UPLOAD_LIMIT)
 async def upload_document(
+    request: Request,
     background: BackgroundTasks,
     file: UploadFile,
     session: AsyncSession = Depends(get_session),

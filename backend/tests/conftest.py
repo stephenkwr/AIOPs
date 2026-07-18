@@ -5,6 +5,7 @@ from sqlalchemy import text
 
 from app.config import settings
 from app.db import engine
+from app.limits import limiter
 from app.main import app
 
 
@@ -12,9 +13,11 @@ from app.main import app
 def _hermetic_providers() -> None:
     """Force offline providers so tests never call Gemini/Groq, even when the
     developer's .env has real keys. Real providers are covered by a separate
-    live smoke check, not the unit suite."""
+    live smoke check, not the unit suite. Rate limits are off — the suite
+    fires requests far faster than any human demo would."""
     settings.embed_provider = "fake"
     settings.llm_provider = "fake"
+    limiter.enabled = False
 
 
 @pytest_asyncio.fixture

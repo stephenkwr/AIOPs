@@ -6,13 +6,14 @@ endpoints are global rather than workspace-scoped.
 
 import uuid
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.eval.dataset import load_corpus, load_dataset
 from app.core.eval.runner import run_eval
 from app.db import get_session
+from app.limits import EVAL_LIMIT, limiter
 from app.models import EvalCase, EvalRun
 from app.schemas.eval import (
     DatasetInfo,
@@ -75,7 +76,9 @@ async def get_eval_run(
 
 
 @router.post("/runs", response_model=EvalRunSummary, status_code=201)
+@limiter.limit(EVAL_LIMIT)
 async def start_eval_run(
+    request: Request,
     body: EvalStartRequest,
     background: BackgroundTasks,
     session: AsyncSession = Depends(get_session),

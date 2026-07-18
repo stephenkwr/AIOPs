@@ -356,6 +356,29 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/demo/seed": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Seed Demo
+         * @description Load the Aurora support KB into the demo workspace (idempotent).
+         *
+         *     Documents ingest in the background — the Documents page shows each one move
+         *     through parsing → chunking → embedding → ready, exactly like a real upload.
+         */
+        post: operations["seed_demo_api_v1_demo_seed_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/": {
         parameters: {
             query?: never;
@@ -508,6 +531,15 @@ export interface components {
             gold_doc: string | null;
             /** Reference Answer */
             reference_answer: string;
+        };
+        /** DemoSeedResult */
+        DemoSeedResult: {
+            /** Queued */
+            queued: number;
+            /** Skipped */
+            skipped: number;
+            /** Suggested Questions */
+            suggested_questions: string[];
         };
         /** DocumentOut */
         DocumentOut: {
@@ -1597,6 +1629,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    seed_demo_api_v1_demo_seed_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DemoSeedResult"];
                 };
             };
         };

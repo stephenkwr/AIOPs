@@ -47,7 +47,10 @@ def upgrade() -> None:
         sa.Column("metrics", postgresql.JSONB(), nullable=True),
         sa.Column("failure_reason", sa.Text(), nullable=True),
         sa.Column(
-            "created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
         ),
         sa.Column("finished_at", sa.DateTime(timezone=True), nullable=True),
         sa.CheckConstraint(
@@ -78,7 +81,10 @@ def upgrade() -> None:
         sa.Column("judge", postgresql.JSONB(), nullable=True),
         sa.Column("correct", sa.Boolean(), nullable=True),
         sa.Column(
-            "created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
         ),
         sa.ForeignKeyConstraint(["eval_run_id"], ["eval_runs.id"], ondelete="CASCADE"),
     )

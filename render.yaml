@@ -15,6 +15,10 @@ services:
         value: production
       - key: PYTHON_VERSION
         value: "3.12"
+      # Trust X-Forwarded-For from Render's proxy so per-IP rate limiting sees the
+      # real client IP (only the proxy can reach this service, so "*" is safe here).
+      - key: FORWARDED_ALLOW_IPS
+        value: "*"
       # Set these in the Render dashboard (sync:false = not stored in this file).
       - key: DATABASE_URL          # Supabase transaction pooler (port 6543)
         sync: false
