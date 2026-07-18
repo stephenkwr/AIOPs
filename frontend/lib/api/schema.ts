@@ -118,6 +118,9 @@ export interface paths {
         /**
          * List Runs
          * @description Every run in the workspace — chat and agent — newest first, for the Traces list.
+         *
+         *     ``step_count`` here is the number of recorded trace steps (so it matches the
+         *     waterfall on the detail page), not the agent's internal LLM-turn budget counter.
          */
         get: operations["list_runs_api_v1_runs_get"];
         put?: never;
@@ -301,6 +304,58 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/eval/dataset": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Dataset */
+        get: operations["get_dataset_api_v1_eval_dataset_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/eval/runs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Eval Runs */
+        get: operations["list_eval_runs_api_v1_eval_runs_get"];
+        put?: never;
+        /** Start Eval Run */
+        post: operations["start_eval_run_api_v1_eval_runs_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/eval/runs/{run_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Eval Run */
+        get: operations["get_eval_run_api_v1_eval_runs__run_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/": {
         parameters: {
             query?: never;
@@ -424,6 +479,36 @@ export interface components {
              */
             created_at: string;
         };
+        /** DatasetInfo */
+        DatasetInfo: {
+            /** Name */
+            name: string;
+            /** Total */
+            total: number;
+            /** Answerable */
+            answerable: number;
+            /** Unanswerable */
+            unanswerable: number;
+            /** Corpus Docs */
+            corpus_docs: string[];
+            /** Items */
+            items: components["schemas"]["DatasetItemOut"][];
+        };
+        /** DatasetItemOut */
+        DatasetItemOut: {
+            /** Id */
+            id: string;
+            /** Question */
+            question: string;
+            /** Category */
+            category: string;
+            /** Answerable */
+            answerable: boolean;
+            /** Gold Doc */
+            gold_doc: string | null;
+            /** Reference Answer */
+            reference_answer: string;
+        };
         /** DocumentOut */
         DocumentOut: {
             /**
@@ -471,6 +556,142 @@ export interface components {
              * Format: date-time
              */
             created_at: string;
+        };
+        /** EvalCaseOut */
+        EvalCaseOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Case Id */
+            case_id: string;
+            /** Question */
+            question: string;
+            /** Category */
+            category: string;
+            /** Answerable */
+            answerable: boolean;
+            /** Gold Doc */
+            gold_doc: string | null;
+            /** Retrieved */
+            retrieved: string[] | null;
+            /** Hit */
+            hit: boolean;
+            /** Rank */
+            rank: number | null;
+            /** Reciprocal Rank */
+            reciprocal_rank: number;
+            /** Answer */
+            answer: string | null;
+            /** Refused */
+            refused: boolean;
+            /** Judge */
+            judge: {
+                [key: string]: unknown;
+            } | null;
+            /** Correct */
+            correct: boolean | null;
+        };
+        /** EvalRunDetail */
+        EvalRunDetail: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Label */
+            label: string;
+            /** Dataset */
+            dataset: string;
+            /** Retrieval Mode */
+            retrieval_mode: string;
+            /** K */
+            k: number;
+            /** Graded */
+            graded: boolean;
+            /** Answer Model */
+            answer_model: string | null;
+            /** Judge Model */
+            judge_model: string | null;
+            /** Status */
+            status: string;
+            /** Num Cases */
+            num_cases: number;
+            /** Metrics */
+            metrics: {
+                [key: string]: unknown;
+            } | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Finished At */
+            finished_at: string | null;
+            /** Failure Reason */
+            failure_reason: string | null;
+            /** Cases */
+            cases: components["schemas"]["EvalCaseOut"][];
+        };
+        /** EvalRunSummary */
+        EvalRunSummary: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Label */
+            label: string;
+            /** Dataset */
+            dataset: string;
+            /** Retrieval Mode */
+            retrieval_mode: string;
+            /** K */
+            k: number;
+            /** Graded */
+            graded: boolean;
+            /** Answer Model */
+            answer_model: string | null;
+            /** Judge Model */
+            judge_model: string | null;
+            /** Status */
+            status: string;
+            /** Num Cases */
+            num_cases: number;
+            /** Metrics */
+            metrics: {
+                [key: string]: unknown;
+            } | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Finished At */
+            finished_at: string | null;
+        };
+        /** EvalStartRequest */
+        EvalStartRequest: {
+            /** Label */
+            label?: string | null;
+            /**
+             * Retrieval Mode
+             * @default hybrid
+             */
+            retrieval_mode: string;
+            /**
+             * K
+             * @default 8
+             */
+            k: number;
+            /**
+             * Graded
+             * @default false
+             */
+            graded: boolean;
+            /** Limit */
+            limit?: number | null;
         };
         /** HTTPValidationError */
         HTTPValidationError: {
@@ -1272,6 +1493,110 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["EscalationOut"][];
+                };
+            };
+        };
+    };
+    get_dataset_api_v1_eval_dataset_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DatasetInfo"];
+                };
+            };
+        };
+    };
+    list_eval_runs_api_v1_eval_runs_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EvalRunSummary"][];
+                };
+            };
+        };
+    };
+    start_eval_run_api_v1_eval_runs_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EvalStartRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EvalRunSummary"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_eval_run_api_v1_eval_runs__run_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EvalRunDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

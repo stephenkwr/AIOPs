@@ -138,6 +138,29 @@ async def test_runner_graded_populates_judge(db_ready: None) -> None:
         assert c.correct in (True, False)
 
 
+# --- CI smoke-eval: retrieval regression tripwire ---------------------------
+
+
+async def test_smoke_eval_hybrid_beats_keyword_baseline(db_ready: None) -> None:
+    """The hermetic before/after. Hybrid retrieval must stay near-perfect on the
+    golden corpus and decisively beat the keyword baseline — a retrieval
+    regression (chunker, retriever, RRF, corpus) fails CI right here."""
+    kw = await _make_run("keyword", graded=False, limit=None)
+    hy = await _make_run("hybrid", graded=False, limit=None)
+    async with SessionLocal() as s:
+        kw_run = await s.get(EvalRun, kw)
+        hy_run = await s.get(EvalRun, hy)
+
+    # Surface the recorded root cause if a run failed, instead of a bare TypeError.
+    assert (kw_run.status, kw_run.failure_reason) == ("completed", None)
+    assert (hy_run.status, hy_run.failure_reason) == ("completed", None)
+    kw_metrics, hy_metrics = kw_run.metrics, hy_run.metrics
+
+    assert hy_metrics["hit_at_k"] >= 0.9, f"hybrid hit@k regressed: {hy_metrics['hit_at_k']}"
+    assert hy_metrics["mrr"] >= 0.5, f"hybrid MRR regressed: {hy_metrics['mrr']}"
+    assert hy_metrics["hit_at_k"] > kw_metrics["hit_at_k"]
+
+
 # --- seeder reconciliation (DB) ---------------------------------------------
 
 
