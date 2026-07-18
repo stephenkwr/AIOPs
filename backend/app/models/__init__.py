@@ -6,6 +6,8 @@ from app.models.chunk import Chunk
 from app.models.conversation import Conversation
 from app.models.document import Document
 from app.models.escalation import Escalation
+from app.models.eval_case import EvalCase
+from app.models.eval_run import EvalRun
 from app.models.message import Message
 from app.models.order import Order
 from app.models.run import Run
@@ -19,6 +21,8 @@ __all__ = [
     "Conversation",
     "Document",
     "Escalation",
+    "EvalCase",
+    "EvalRun",
     "Message",
     "Order",
     "Run",

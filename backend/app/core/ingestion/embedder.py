@@ -32,6 +32,7 @@ def _l2_normalize(vec: list[float]) -> list[float]:
 
 class Embedder(Protocol):
     dim: int
+    identity: str  # provenance stamp: which embedder/model produced a vector
 
     async def embed(self, texts: list[str]) -> list[list[float]]: ...
 
@@ -43,6 +44,7 @@ class HashingEmbedder:
 
     def __init__(self, dim: int = 768) -> None:
         self.dim = dim
+        self.identity = f"hashing@{dim}"
 
     async def embed(self, texts: list[str]) -> list[list[float]]:
         return [self._embed_one(t) for t in texts]
@@ -69,6 +71,7 @@ class GeminiEmbedder:
         self._client = genai.Client(api_key=api_key)
         self.model = model
         self.dim = dim
+        self.identity = f"{model}@{dim}"
 
     async def embed(self, texts: list[str]) -> list[list[float]]:
         out: list[list[float]] = []

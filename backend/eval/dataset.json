@@ -1,0 +1,583 @@
+{
+  "name": "aurora-support-v1",
+  "description": "Golden Q&A for Aurora Supply Co. support KB. Answerable items are gold-labeled to their source document; the unanswerable slice should trigger a refusal/escalation.",
+  "corpus_dir": "corpus",
+  "items": [
+    {
+      "id": "account-management-1",
+      "question": "I want to change the email on my account, how long is the verification link good for before it expires?",
+      "reference_answer": "The verification link sent to your new email address is valid for 24 hours; your login email won't change until you click it, and a heads-up notice is also sent to your old email for security.",
+      "category": "account-management",
+      "answerable": true,
+      "gold_doc": "account-management.md"
+    },
+    {
+      "id": "account-management-2",
+      "question": "How many shipping addresses am I allowed to save, and will editing one change an order I already placed?",
+      "reference_answer": "You can save up to 5 shipping addresses under Account > Addresses, but editing an address won't change one already locked into a confirmed order — you'd need to contact Support to redirect a package in transit.",
+      "category": "account-management",
+      "answerable": true,
+      "gold_doc": "account-management.md"
+    },
+    {
+      "id": "account-management-3",
+      "question": "Can I turn off promotional emails but keep getting shipping updates?",
+      "reference_answer": "Yes, in Account > Notification Preferences you can turn off Promotions & Discounts independently, but order and shipping updates can't be fully disabled — you can only choose to receive them by email, SMS, or both.",
+      "category": "account-management",
+      "answerable": true,
+      "gold_doc": "account-management.md"
+    },
+    {
+      "id": "account-management-4",
+      "question": "If I close my account, will I still be able to see my past orders, and can I get a copy of my invoices first?",
+      "reference_answer": "After closure your order history is no longer accessible via login, though it's kept in secure archives for 7 years for tax records; if you want a copy of your order history or invoices, you must request it during the 30-day grace period and Support will email a PDF export within 5 business days.",
+      "category": "account-management",
+      "answerable": true,
+      "gold_doc": "account-management.md"
+    },
+    {
+      "id": "account-management-5",
+      "question": "How many cards can I have saved for payment, and is my full card number visible to support agents?",
+      "reference_answer": "You can store up to 3 cards (Visa, Mastercard, or Amex) plus a linked PayPal account, and full card numbers are never stored or visible — only the last 4 digits and expiry appear to you or Aurora agents.",
+      "category": "account-management",
+      "answerable": true,
+      "gold_doc": "account-management.md"
+    },
+    {
+      "id": "billing-payments-1",
+      "question": "What forms of payment does Aurora Supply Co accept?",
+      "reference_answer": "Aurora accepts Visa, Mastercard, American Express, Discover, PayPal, Apple Pay, and Google Pay, but does not accept cash on delivery, personal checks, or direct bank transfers.",
+      "category": "billing-payments",
+      "answerable": true,
+      "gold_doc": "billing-payments.md"
+    },
+    {
+      "id": "billing-payments-2",
+      "question": "I ordered a tent that's on backorder along with an in-stock item - will I be charged for everything right away?",
+      "reference_answer": "No. The in-stock item is captured (charged) within 1 hour of placing the order, but the backordered item isn't charged until it actually ships, roughly 10-15 business days later, so you may see two separate charges for the two shipments.",
+      "category": "billing-payments",
+      "answerable": true,
+      "gold_doc": "billing-payments.md"
+    },
+    {
+      "id": "billing-payments-3",
+      "question": "How can I get an invoice for my order for my expense report?",
+      "reference_answer": "A PDF invoice is emailed automatically within 30 minutes of dispatch, and it's also available anytime under My Account > Order History > select the order > 'View Invoice', retained for up to 7 years; if you need one before dispatch, support can issue a pro-forma invoice.",
+      "category": "billing-payments",
+      "answerable": true,
+      "gold_doc": "billing-payments.md"
+    },
+    {
+      "id": "billing-payments-4",
+      "question": "My card was declined at checkout - what happens to my order now?",
+      "reference_answer": "The order goes to 'Payment Failed' status and your items are held for 48 hours while you use the 'Retry Payment' link emailed to you; if payment still hasn't succeeded after 48 hours, the order auto-cancels and the items go back into inventory.",
+      "category": "billing-payments",
+      "answerable": true,
+      "gold_doc": "billing-payments.md"
+    },
+    {
+      "id": "billing-payments-5",
+      "question": "Does Aurora keep my full credit card number on file after I save it to my account?",
+      "reference_answer": "No, full card numbers are tokenized by Aurora's PCI DSS Level 1 certified payment processor and never stored on Aurora's systems; only the last 4 digits, expiry date, and card brand are kept for display, and you can remove saved cards anytime in Account Settings.",
+      "category": "billing-payments",
+      "answerable": true,
+      "gold_doc": "billing-payments.md"
+    },
+    {
+      "id": "contact-hours-1",
+      "question": "What are your live chat hours on the weekend?",
+      "reference_answer": "Live chat is available Saturday and Sunday from 9:00 AM to 6:00 PM Eastern Time.",
+      "category": "contact-hours",
+      "answerable": true,
+      "gold_doc": "contact-hours.md"
+    },
+    {
+      "id": "contact-hours-2",
+      "question": "I emailed support on a Saturday, how long until I hear back?",
+      "reference_answer": "Since it was sent over the weekend, expect a response within 48 hours, by the next business day at the latest.",
+      "category": "contact-hours",
+      "answerable": true,
+      "gold_doc": "contact-hours.md"
+    },
+    {
+      "id": "contact-hours-3",
+      "question": "Is phone support open on Sundays?",
+      "reference_answer": "No, phone lines are closed on Sundays (and on major US holidays).",
+      "category": "contact-hours",
+      "answerable": true,
+      "gold_doc": "contact-hours.md"
+    },
+    {
+      "id": "contact-hours-4",
+      "question": "My order is over $500 and I still haven't gotten a resolution after contacting support twice, what happens now?",
+      "reference_answer": "Since the order total is over $500 and the issue is unresolved after two prior contacts, it qualifies for escalation to a specialist team (Damage & Warranty Claims or Large Order Support), who will follow up within 1 business day.",
+      "category": "contact-hours",
+      "answerable": true,
+      "gold_doc": "contact-hours.md"
+    },
+    {
+      "id": "contact-hours-5",
+      "question": "How long does it usually take to get through on the phone line?",
+      "reference_answer": "Average hold time is under 5 minutes during business hours, though call volume is highest between 12:00 PM and 2:00 PM ET.",
+      "category": "contact-hours",
+      "answerable": true,
+      "gold_doc": "contact-hours.md"
+    },
+    {
+      "id": "gift-cards-1",
+      "question": "What amounts can I buy an Aurora gift card in?",
+      "reference_answer": "Gift cards come in fixed denominations of $25, $50, $100, and $250, or you can choose a custom amount between $10 and $500.",
+      "category": "gift-cards",
+      "answerable": true,
+      "gold_doc": "gift-cards.md"
+    },
+    {
+      "id": "gift-cards-2",
+      "question": "Can I use two gift cards on the same order?",
+      "reference_answer": "Yes, you can apply more than one gift card to a single order, and if the total is higher than the combined balance you pay the difference with another method.",
+      "category": "gift-cards",
+      "answerable": true,
+      "gold_doc": "gift-cards.md"
+    },
+    {
+      "id": "gift-cards-3",
+      "question": "Do Aurora gift cards expire?",
+      "reference_answer": "No, Aurora gift cards never expire and have no monthly fees.",
+      "category": "gift-cards",
+      "answerable": true,
+      "gold_doc": "gift-cards.md"
+    },
+    {
+      "id": "gift-cards-4",
+      "question": "If I paid with a gift card and return something, how do I get my money back?",
+      "reference_answer": "If you paid for an order with a gift card and return an item, the refund is issued back to the gift card rather than to a bank account or credit card.",
+      "category": "gift-cards",
+      "answerable": true,
+      "gold_doc": "gift-cards.md"
+    },
+    {
+      "id": "gift-cards-5",
+      "question": "How do I check how much is left on my gift card?",
+      "reference_answer": "Go to the Gift Cards page, select Check balance, and enter your card number to see your remaining balance and recent redemption history.",
+      "category": "gift-cards",
+      "answerable": true,
+      "gold_doc": "gift-cards.md"
+    },
+    {
+      "id": "membership-plans-1",
+      "question": "How much does Aurora Pro cost per month?",
+      "reference_answer": "Aurora Pro costs $19.99 per month, or $189 per year if billed annually.",
+      "category": "membership-plans",
+      "answerable": true,
+      "gold_doc": "membership-plans.md"
+    },
+    {
+      "id": "membership-plans-2",
+      "question": "Does Aurora Plus give me free shipping, and is there a minimum order size for it?",
+      "reference_answer": "Yes, Aurora Plus includes free standard shipping (5-7 business days) with no minimum order size required.",
+      "category": "membership-plans",
+      "answerable": true,
+      "gold_doc": "membership-plans.md"
+    },
+    {
+      "id": "membership-plans-3",
+      "question": "If I upgrade my membership in the middle of a billing cycle, when does it kick in and how am I billed?",
+      "reference_answer": "The upgrade takes effect immediately, and you're charged a prorated amount for the remaining days in the current billing cycle at the new tier's rate.",
+      "category": "membership-plans",
+      "answerable": true,
+      "gold_doc": "membership-plans.md"
+    },
+    {
+      "id": "membership-plans-4",
+      "question": "I want to cancel my Pro membership - will I get a refund for the days I don't use?",
+      "reference_answer": "No, cancellation takes effect at the end of your current paid period and Aurora does not issue partial refunds for unused days; your perks stay active until the period ends.",
+      "category": "membership-plans",
+      "answerable": true,
+      "gold_doc": "membership-plans.md"
+    },
+    {
+      "id": "membership-plans-5",
+      "question": "What's the difference in early access timing between Plus and Pro members?",
+      "reference_answer": "Plus members get early access to sale events 24 hours before the public, while Pro members get early access 48 hours before the public.",
+      "category": "membership-plans",
+      "answerable": true,
+      "gold_doc": "membership-plans.md"
+    },
+    {
+      "id": "order-tracking-1",
+      "question": "I never got a shipping email, where else can I find my tracking number?",
+      "reference_answer": "Sign in to your Aurora account and go to Order History, then select Track Package next to the order; guest orders can be tracked from the confirmation email using the order number and billing zip code.",
+      "category": "order-tracking",
+      "answerable": true,
+      "gold_doc": "order-tracking.md"
+    },
+    {
+      "id": "order-tracking-2",
+      "question": "My order status says 'Exception' — what does that mean?",
+      "reference_answer": "Exception means there's an unexpected delay such as weather, transit damage, or an address issue, and Aurora will email you with details and next steps.",
+      "category": "order-tracking",
+      "answerable": true,
+      "gold_doc": "order-tracking.md"
+    },
+    {
+      "id": "order-tracking-3",
+      "question": "How long should my camping gear order take to arrive after it ships?",
+      "reference_answer": "Standard parcel items like camping gear typically arrive 3-7 business days after shipping.",
+      "category": "order-tracking",
+      "answerable": true,
+      "gold_doc": "order-tracking.md"
+    },
+    {
+      "id": "order-tracking-4",
+      "question": "Why is my furniture order taking so much longer than my other packages?",
+      "reference_answer": "Large furniture ships via freight carrier and takes 7-14 business days, including a scheduled delivery call 1-2 days ahead, which is longer than standard parcel shipping.",
+      "category": "order-tracking",
+      "answerable": true,
+      "gold_doc": "order-tracking.md"
+    },
+    {
+      "id": "order-tracking-5",
+      "question": "My tracking says my package was delivered yesterday but I don't have it, what should I do?",
+      "reference_answer": "Wait 24 hours since some carriers scan packages as delivered slightly early, check your porch, mailroom, or with neighbors, and look for a delivery photo if available; if it still hasn't shown up, contact Aurora support within 7 days of the delivery date to file a carrier trace and get a replacement or refund.",
+      "category": "order-tracking",
+      "answerable": true,
+      "gold_doc": "order-tracking.md"
+    },
+    {
+      "id": "password-reset-1",
+      "question": "How long do I have before the password reset link in the email expires?",
+      "reference_answer": "The reset link is valid for 30 minutes from the time the email is sent; after that you'll need to request a new one.",
+      "category": "password-reset",
+      "answerable": true,
+      "gold_doc": "password-reset.md"
+    },
+    {
+      "id": "password-reset-2",
+      "question": "I requested a password reset but the email never showed up in my inbox, what should I do?",
+      "reference_answer": "Check your spam or promotions folder, confirm you used the correct email address, and allow up to 5 minutes for delivery. If it still doesn't arrive, you can request another email, though you're limited to 3 reset requests per hour per account.",
+      "category": "password-reset",
+      "answerable": true,
+      "gold_doc": "password-reset.md"
+    },
+    {
+      "id": "password-reset-3",
+      "question": "If I enter my password wrong several times in a row, will my account get locked?",
+      "reference_answer": "Yes, after 5 consecutive failed login attempts the account is temporarily locked for 15 minutes as a security measure, and access is restored automatically once that time passes.",
+      "category": "account-lockout",
+      "answerable": true,
+      "gold_doc": "password-reset.md"
+    },
+    {
+      "id": "password-reset-4",
+      "question": "I have two-factor authentication turned on. Will I still need to enter a code after resetting my password?",
+      "reference_answer": "Yes, resetting your password does not disable 2FA, so you'll still need to enter the 6-digit verification code sent to your phone or generated by your authenticator app, which is valid for 10 minutes.",
+      "category": "two-factor-authentication",
+      "answerable": true,
+      "gold_doc": "password-reset.md"
+    },
+    {
+      "id": "password-reset-5",
+      "question": "What are the requirements for my new password when resetting it?",
+      "reference_answer": "Your new password must be at least 8 characters long and include one number and one letter.",
+      "category": "password-reset",
+      "answerable": true,
+      "gold_doc": "password-reset.md"
+    },
+    {
+      "id": "promo-codes-1",
+      "question": "Where exactly do I enter a promo code when I'm checking out?",
+      "reference_answer": "On the Checkout page, enter the code in the 'Promo code' field above the Place Order button and select Apply; the discount appears as a line item before you submit payment.",
+      "category": "checkout",
+      "answerable": true,
+      "gold_doc": "promo-codes.md"
+    },
+    {
+      "id": "promo-codes-2",
+      "question": "Can I stack two different discount codes on one order?",
+      "reference_answer": "No, only one promo code can be applied per order — entering a second code replaces the first instead of stacking, though promo codes can still be combined with gift card or store credit balances.",
+      "category": "stacking",
+      "answerable": true,
+      "gold_doc": "promo-codes.md"
+    },
+    {
+      "id": "promo-codes-3",
+      "question": "I applied a code but it didn't discount my whole cart, why?",
+      "reference_answer": "Promo codes exclude gift cards, items in the Clearance/Sale collection, Aurora Outdoor Pro tents, Heritage Oak furniture, and shipping fees, so if your cart mixes eligible and excluded items, the discount only applies to the eligible items' subtotal.",
+      "category": "exclusions",
+      "answerable": true,
+      "gold_doc": "promo-codes.md"
+    },
+    {
+      "id": "promo-codes-4",
+      "question": "My promo code says it's expired, can support still honor it for me?",
+      "reference_answer": "No, manual extensions or backdated discounts aren't issued on expired codes; since seasonal codes typically last 14 days and welcome codes 30 days from signup, you should check the newsletter sign-up page for a current active offer instead.",
+      "category": "troubleshooting",
+      "answerable": true,
+      "gold_doc": "promo-codes.md"
+    },
+    {
+      "id": "promo-codes-5",
+      "question": "I already used WELCOME15 on my old account — can I use it again on a new account I just made?",
+      "reference_answer": "No, welcome codes like WELCOME15 are limited to one redemption per customer, tracked by account email and billing address, so checkout will block reuse with a message saying the code has already been used.",
+      "category": "one-per-customer",
+      "answerable": true,
+      "gold_doc": "promo-codes.md"
+    },
+    {
+      "id": "refunds-1",
+      "question": "Will my refund go back onto my credit card, or can I get cash instead?",
+      "reference_answer": "Refunds are issued to the original payment method used at checkout, such as your credit card - Aurora does not issue cash refunds for card, debit, or PayPal orders.",
+      "category": "refunds",
+      "answerable": true,
+      "gold_doc": "refunds.md"
+    },
+    {
+      "id": "refunds-2",
+      "question": "How long after you get my return will it take for the money to actually show up in my bank account?",
+      "reference_answer": "Aurora approves the refund within 2 business days of receiving and inspecting your return, and credit/debit card refunds then take 3-5 more business days to post, so the total refund typically appears 3-7 business days after your return is received.",
+      "category": "refunds",
+      "answerable": true,
+      "gold_doc": "refunds.md"
+    },
+    {
+      "id": "refunds-3",
+      "question": "I'm returning a $250 chair but lost the original box - will I get the full amount back?",
+      "reference_answer": "No, large furniture items returned without original packaging or missing hardware incur a 10% restocking fee, so a $250 chair returned without its box would be refunded at $225.",
+      "category": "refunds",
+      "answerable": true,
+      "gold_doc": "refunds.md"
+    },
+    {
+      "id": "refunds-4",
+      "question": "I paid for part of my order with a gift card - will that portion come back to my credit card?",
+      "reference_answer": "No, the portion paid with an Aurora gift card is refunded as a new e-gift card code emailed within 1 business day of approval, not credited back to a bank card; only the remaining balance paid by card follows the standard card refund timeline.",
+      "category": "refunds",
+      "answerable": true,
+      "gold_doc": "refunds.md"
+    },
+    {
+      "id": "refunds-5",
+      "question": "It's been almost two weeks since I got my refund approval email and I still don't see the money - what should I do?",
+      "reference_answer": "If more than 10 business days have passed since the refund-approval email without the funds posting, contact Aurora Support at support@aurorasupplyco.com or via live chat (Mon-Sat, 9am-7pm) with your order number so they can trace the transaction.",
+      "category": "refunds",
+      "answerable": true,
+      "gold_doc": "refunds.md"
+    },
+    {
+      "id": "returns-exchanges-1",
+      "question": "How many days do I have to send something back after it arrives?",
+      "reference_answer": "You have 30 days from the delivery date shown on your delivery confirmation email to return an item.",
+      "category": "returns-exchanges",
+      "answerable": true,
+      "gold_doc": "returns-exchanges.md"
+    },
+    {
+      "id": "returns-exchanges-2",
+      "question": "Do I have to pay anything to ship back an item I just changed my mind about?",
+      "reference_answer": "Yes, change-of-mind returns use a prepaid label but a flat $6.95 return shipping fee is deducted from your refund; only defective, damaged, or incorrectly shipped items ship back completely free.",
+      "category": "returns-exchanges",
+      "answerable": true,
+      "gold_doc": "returns-exchanges.md"
+    },
+    {
+      "id": "returns-exchanges-3",
+      "question": "Can I swap an item for a different size instead of getting my money back?",
+      "reference_answer": "Yes, you can request an exchange instead of a refund during the return process, and the replacement ships free once your original item is received and inspected, subject to the same 30-day window and condition rules.",
+      "category": "returns-exchanges",
+      "answerable": true,
+      "gold_doc": "returns-exchanges.md"
+    },
+    {
+      "id": "returns-exchanges-4",
+      "question": "I opened the box and assembled my chair before deciding I don't want it — can I still return it?",
+      "reference_answer": "It may be accepted, but items must generally be unused and returned in original packaging with tags and hardware; items showing signs of use or assembly damage may be refused or charged a 15% restocking fee.",
+      "category": "returns-exchanges",
+      "answerable": true,
+      "gold_doc": "returns-exchanges.md"
+    },
+    {
+      "id": "returns-exchanges-5",
+      "question": "Can I return the propane canister I bought for my camping stove?",
+      "reference_answer": "No, propane canisters, camp fuel, and other combustible or pressurized items are non-returnable for safety reasons.",
+      "category": "returns-exchanges",
+      "answerable": true,
+      "gold_doc": "returns-exchanges.md"
+    },
+    {
+      "id": "shipping-delivery-1",
+      "question": "How many days does standard shipping usually take once my order ships?",
+      "reference_answer": "Standard Shipping takes 4 to 6 business days after dispatch, at a flat rate of $6.95 (free on orders of $75 or more).",
+      "category": "shipping-delivery",
+      "answerable": true,
+      "gold_doc": "shipping-delivery.md"
+    },
+    {
+      "id": "shipping-delivery-2",
+      "question": "What time do I need to place my order to get it shipped out the same day?",
+      "reference_answer": "Orders placed Monday through Friday before 1:00 PM Pacific Time ship the same business day; anything placed after that cutoff, or on a weekend/holiday, goes out the next business day.",
+      "category": "shipping-delivery",
+      "answerable": true,
+      "gold_doc": "shipping-delivery.md"
+    },
+    {
+      "id": "shipping-delivery-3",
+      "question": "Is there a minimum order amount to get free shipping?",
+      "reference_answer": "Yes, Standard Shipping becomes free automatically once the merchandise subtotal reaches $75 before tax; Express Shipping ($14.95) and White Glove Delivery ($49.00) are not covered by this threshold.",
+      "category": "shipping-delivery",
+      "answerable": true,
+      "gold_doc": "shipping-delivery.md"
+    },
+    {
+      "id": "shipping-delivery-4",
+      "question": "Who delivers large furniture items like sofas or dining tables?",
+      "reference_answer": "Oversized furniture over 75 lb goes out via White Glove Delivery through FedEx Freight's home-delivery network, taking 7 to 10 business days and including room-of-choice placement and packaging removal.",
+      "category": "shipping-delivery",
+      "answerable": true,
+      "gold_doc": "shipping-delivery.md"
+    },
+    {
+      "id": "shipping-delivery-5",
+      "question": "I live in Hawaii — can I pay for express shipping to get my order faster?",
+      "reference_answer": "No, Hawaii, Alaska, and PO Box addresses can only receive Standard Shipping via USPS, which takes 2 to 4 additional business days beyond the normal window, and White Glove Delivery isn't available there either.",
+      "category": "shipping-delivery",
+      "answerable": true,
+      "gold_doc": "shipping-delivery.md"
+    },
+    {
+      "id": "warranty-1",
+      "question": "How long is the warranty on the furniture I buy from Aurora?",
+      "reference_answer": "Aurora's standard warranty is 2 years from the delivery date for manufacturing defects, but solid wood and metal furniture frames get an extended 5-year structural warranty (frame only, not fabric or cushions).",
+      "category": "warranty",
+      "answerable": true,
+      "gold_doc": "warranty.md"
+    },
+    {
+      "id": "warranty-2",
+      "question": "What do I need to send in when I file a warranty claim?",
+      "reference_answer": "You need your order number, a description of the issue, and 2-3 clear photos (or a short video for mechanical issues) showing the defect and the product's serial/label tag.",
+      "category": "warranty",
+      "answerable": true,
+      "gold_doc": "warranty.md"
+    },
+    {
+      "id": "warranty-3",
+      "question": "Is it covered under warranty if the fabric on my outdoor chair fades in the sun?",
+      "reference_answer": "No, fading or discoloration from sun/UV exposure is explicitly excluded from Aurora's warranty coverage.",
+      "category": "warranty",
+      "answerable": true,
+      "gold_doc": "warranty.md"
+    },
+    {
+      "id": "warranty-4",
+      "question": "After I submit a warranty claim, how long does review take and what will I get if it's approved?",
+      "reference_answer": "Aurora's team reviews claims within 3 business days, and approved claims receive a replacement part, a full replacement unit, or store credit at Aurora's discretion.",
+      "category": "warranty",
+      "answerable": true,
+      "gold_doc": "warranty.md"
+    },
+    {
+      "id": "warranty-5",
+      "question": "What does the Aurora Care+ extended warranty cost and what does it add?",
+      "reference_answer": "Aurora Care+ costs 15% of the item's price and extends total coverage to 5 years while adding up to 2 accidental-damage claims (stains, tears, drops) per item.",
+      "category": "warranty",
+      "answerable": true,
+      "gold_doc": "warranty.md"
+    },
+    {
+      "id": "unanswerable-1",
+      "question": "Do you price-match other retailers like Amazon or Walmart?",
+      "reference_answer": "",
+      "category": "unanswerable",
+      "answerable": false,
+      "gold_doc": null
+    },
+    {
+      "id": "unanswerable-2",
+      "question": "Can you send me the full name and home address for the person who placed order #88231?",
+      "reference_answer": "",
+      "category": "unanswerable",
+      "answerable": false,
+      "gold_doc": null
+    },
+    {
+      "id": "unanswerable-3",
+      "question": "What is Aurora Supply Co.'s stock ticker symbol and current share price?",
+      "reference_answer": "",
+      "category": "unanswerable",
+      "answerable": false,
+      "gold_doc": null
+    },
+    {
+      "id": "unanswerable-4",
+      "question": "Do you carry brake pads and oil filters for cars?",
+      "reference_answer": "",
+      "category": "unanswerable",
+      "answerable": false,
+      "gold_doc": null
+    },
+    {
+      "id": "unanswerable-5",
+      "question": "I'm really frustrated — can you just apply a 75% loyalty discount to my cart right now?",
+      "reference_answer": "",
+      "category": "unanswerable",
+      "answerable": false,
+      "gold_doc": null
+    },
+    {
+      "id": "unanswerable-6",
+      "question": "How many employees work at the Reno fulfillment center?",
+      "reference_answer": "",
+      "category": "unanswerable",
+      "answerable": false,
+      "gold_doc": null
+    },
+    {
+      "id": "unanswerable-7",
+      "question": "Can I apply to become a wholesale supplier for Aurora?",
+      "reference_answer": "",
+      "category": "unanswerable",
+      "answerable": false,
+      "gold_doc": null
+    },
+    {
+      "id": "unanswerable-8",
+      "question": "Do you offer assembly or installation service for furniture at my home?",
+      "reference_answer": "",
+      "category": "unanswerable",
+      "answerable": false,
+      "gold_doc": null
+    },
+    {
+      "id": "unanswerable-9",
+      "question": "What is the calorie count of your freeze-dried camping meals?",
+      "reference_answer": "",
+      "category": "unanswerable",
+      "answerable": false,
+      "gold_doc": null
+    },
+    {
+      "id": "unanswerable-10",
+      "question": "Does Aurora have a physical retail store I can visit in person?",
+      "reference_answer": "",
+      "category": "unanswerable",
+      "answerable": false,
+      "gold_doc": null
+    },
+    {
+      "id": "unanswerable-11",
+      "question": "Can you tell me which warehouse employee packed my order?",
+      "reference_answer": "",
+      "category": "unanswerable",
+      "answerable": false,
+      "gold_doc": null
+    },
+    {
+      "id": "unanswerable-12",
+      "question": "What is your policy for returning items that were destroyed in a house fire?",
+      "reference_answer": "",
+      "category": "unanswerable",
+      "answerable": false,
+      "gold_doc": null
+    }
+  ]
+}

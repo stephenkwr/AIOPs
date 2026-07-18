@@ -93,23 +93,30 @@ async def retrieve(
     candidates: int = 20,
     embedder: Embedder | None = None,
 ) -> list[RetrievedChunk]:
-    embedder = embedder or get_embedder()
-    qvec = await embedder.embed_query(query)
-
-    vector_hits = await _vector_search(session, workspace_id, qvec, candidates)
-    vector_sim = {chunk.id: sim for chunk, sim in vector_hits}
-
-    if mode == "vector":
-        chosen = [chunk for chunk, _ in vector_hits[:k]]
-        rrf_scores = {c.id: vector_sim.get(c.id, 0.0) for c in chosen}
-    else:
+    # keyword mode is the lexical-only baseline (the eval "before"): no embedding
+    # call, no vector ranking — pure Postgres full-text search.
+    if mode == "keyword":
         keyword_hits = await _keyword_search(session, workspace_id, query, candidates)
-        chosen = _rrf([vector_hits, keyword_hits], top_k=k)
-        # Recompute a display score = RRF contribution for ordering transparency.
-        rrf_scores = {}
-        for ranked in (vector_hits, keyword_hits):
-            for rank, (chunk, _s) in enumerate(ranked):
-                rrf_scores[chunk.id] = rrf_scores.get(chunk.id, 0.0) + 1.0 / (RRF_K + rank + 1)
+        chosen = [chunk for chunk, _ in keyword_hits[:k]]
+        scores = {chunk.id: score for chunk, score in keyword_hits}
+        vector_sim: dict[uuid.UUID, float] = {}
+    else:
+        embedder = embedder or get_embedder()
+        qvec = await embedder.embed_query(query)
+        vector_hits = await _vector_search(session, workspace_id, qvec, candidates)
+        vector_sim = {chunk.id: sim for chunk, sim in vector_hits}
+
+        if mode == "vector":
+            chosen = [chunk for chunk, _ in vector_hits[:k]]
+            scores = {c.id: vector_sim.get(c.id, 0.0) for c in chosen}
+        else:  # hybrid
+            keyword_hits = await _keyword_search(session, workspace_id, query, candidates)
+            chosen = _rrf([vector_hits, keyword_hits], top_k=k)
+            # Display score = RRF contribution, for ordering transparency.
+            scores = {}
+            for ranked in (vector_hits, keyword_hits):
+                for rank, (chunk, _s) in enumerate(ranked):
+                    scores[chunk.id] = scores.get(chunk.id, 0.0) + 1.0 / (RRF_K + rank + 1)
 
     results: list[RetrievedChunk] = []
     for i, chunk in enumerate(chosen):
@@ -121,7 +128,7 @@ async def retrieve(
                 filename=str(chunk.meta.get("filename", "(unknown)")),
                 ord=chunk.ord,
                 text=chunk.text,
-                score=round(rrf_scores.get(chunk.id, 0.0), 6),
+                score=round(scores.get(chunk.id, 0.0), 6),
                 vector_similarity=round(max(0.0, vector_sim.get(chunk.id, 0.0)), 4),
                 location=_location(chunk.meta),
             )

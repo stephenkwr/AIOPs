@@ -7,6 +7,7 @@ from app.api.agent import router as agent_router
 from app.api.approvals import router as approvals_router
 from app.api.chat import router as chat_router
 from app.api.documents import router as documents_router
+from app.api.eval import router as eval_router
 from app.api.health import router as health_router
 from app.api.ops import router as ops_router
 from app.config import settings
@@ -29,6 +30,7 @@ def create_app() -> FastAPI:
     app.include_router(agent_router)
     app.include_router(approvals_router)
     app.include_router(ops_router)
+    app.include_router(eval_router)
 
     @app.get("/", tags=["meta"])
     async def root() -> dict[str, str]:

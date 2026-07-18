@@ -53,7 +53,8 @@ async def process_document(
                 raise ValueError("No text could be extracted from this document")
 
             await _set_status(session, doc, "embedding")
-            vectors = await get_embedder().embed([c.text for c in chunks])
+            embedder = get_embedder()
+            vectors = await embedder.embed([c.text for c in chunks])
 
             for chunk, vector in zip(chunks, vectors, strict=True):
                 session.add(
@@ -64,7 +65,9 @@ async def process_document(
                         text=chunk.text,
                         token_count=chunk.token_count,
                         embedding=vector,
-                        meta=chunk.meta,
+                        # Provenance: which embedder produced this vector. Lets callers
+                        # detect a vector-space mismatch when the provider changes.
+                        meta={**chunk.meta, "embedder": embedder.identity},
                     )
                 )
             doc.chunk_count = len(chunks)

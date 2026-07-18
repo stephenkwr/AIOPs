@@ -64,3 +64,42 @@ def get_answer_client() -> LLMClient:
     from app.core.llm.fallback import FallbackLLMClient
 
     return FallbackLLMClient(chain)
+
+
+def _provider_of(model: str | None) -> str | None:
+    if not model:
+        return None
+    m = model.lower()
+    if "gemini" in m:
+        return "gemini"
+    if "llama" in m or "groq" in m:
+        return "groq"
+    if "claude" in m:
+        return "anthropic"
+    return None
+
+
+def get_judge_client(avoid_model: str | None = None) -> LLMClient | None:
+    """A judge client for LLM-as-judge grading.
+
+    Prefers a provider DIFFERENT from the one that produced the answer (avoids a
+    model grading its own output — self-preference bias). Returns None when only
+    the offline fake is available, so the caller falls back to heuristic grading.
+    """
+    if settings.llm_provider == "fake":
+        return None
+
+    avoid = _provider_of(avoid_model)
+    # Groq first (reliable free tier), then Anthropic, then Gemini.
+    order: list[tuple[str, object]] = []
+    if settings.groq_api_key:
+        order.append(("groq", _groq))
+    if settings.anthropic_api_key:
+        order.append(("anthropic", _anthropic))
+    if settings.gemini_api_key:
+        order.append(("gemini", _gemini))
+    if not order:
+        return None
+
+    preferred = [c for c in order if c[0] != avoid] or order
+    return preferred[0][1]()  # type: ignore[operator]
